@@ -1,3 +1,3 @@
 # ADFS AdBlock dnsmasq
-# Last Modified: 2024-07-26 00:08:50
+# Last Modified: 2024-07-26 08:32:29
 # Homepage: https://github.com/fordes123/ad-filters-subscriber/
