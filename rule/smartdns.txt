@@ -1,3 +1,3 @@
 # ADFS AdBlock smartdns
-# Last Modified: 2024-11-09 00:09:09
+# Last Modified: 2024-11-09 08:36:28
 # Homepage: https://github.com/fordes123/ad-filters-subscriber/
