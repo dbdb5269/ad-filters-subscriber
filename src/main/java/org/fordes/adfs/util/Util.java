@@ -3,6 +3,7 @@ package org.fordes.adfs.util;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
+import org.fordes.adfs.model.Rule;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -64,7 +65,7 @@ public class Util {
                 return str.substring(0, index);
             }
         }
-        return EMPTY;
+        return Symbol.EMPTY;
     }
 
     /**
@@ -83,7 +84,7 @@ public class Util {
                 return content.substring(index + flag.length());
             }
         }
-        return EMPTY;
+        return Symbol.EMPTY;
     }
 
     /**
@@ -103,7 +104,7 @@ public class Util {
                 return content.substring(startIndex + start.length(), endIndex);
             }
         }
-        return EMPTY;
+        return Symbol.EMPTY;
     }
 
     /**
@@ -143,7 +144,10 @@ public class Util {
      * @return {@link Map.Entry} key:ip, value:域名
      */
     public static @Nullable Map.Entry<String, String> parseHosts(String content) {
-        List<String> list = splitIgnoreBlank(content, WHITESPACE);
+        if (content.contains(Symbol.TAB)) {
+            content = content.replace(Symbol.TAB, Symbol.WHITESPACE);
+        }
+        List<String> list = splitIgnoreBlank(content, Symbol.WHITESPACE);
         if (list.size() == 2) {
             String ip = list.get(0).trim();
             String domain = list.get(1).trim();
@@ -180,7 +184,7 @@ public class Util {
         boolean isAbsPath = '/' == path.charAt(0) || PATTERN_PATH_ABSOLUTE.matcher(path).matches();
 
         if (!isAbsPath) {
-            if (path.startsWith(DOT)) {
+            if (path.startsWith(Symbol.DOT)) {
                 path = path.substring(1);
             }
             if (path.startsWith(FILE_SEPARATOR)) {
@@ -189,5 +193,29 @@ public class Util {
             path = ROOT_PATH + FILE_SEPARATOR + path;
         }
         return path;
+    }
+
+
+    public static Rule.Type decectBaseRule(String content) {
+        String temp = content;
+        if (temp.contains(Symbol.ASTERISK)) {
+            temp = content.replace(Symbol.ASTERISK, Symbol.A);
+        }
+
+        while (temp.startsWith(Symbol.DOT)) {
+            temp = temp.substring(1);
+        }
+
+        while (temp.endsWith(Symbol.DOT)) {
+            temp = temp.substring(0, temp.length() - 1);
+        }
+
+        if (PATTERN_DOMAIN.matcher(temp).matches()) {
+            return content.equals(temp) ? Rule.Type.BASIC : Rule.Type.WILDCARD;
+        } else if (DOMAIN_PART.matcher(temp).matches()) {
+            return Rule.Type.WILDCARD;
+        } else {
+            return null;
+        }
     }
 }

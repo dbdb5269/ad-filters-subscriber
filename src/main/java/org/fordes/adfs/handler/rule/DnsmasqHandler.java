@@ -21,23 +21,22 @@ public final class DnsmasqHandler extends Handler implements InitializingBean {
     public Rule parse(String line) {
 
         String content = Util.subAfter(line, DNSMASQ_HEADER, true);
-        List<String> data = Util.splitIgnoreBlank(content, SLASH);
+        List<String> data = Util.splitIgnoreBlank(content, Symbol.SLASH);
         if (data.size() == 1 || data.size() == 2) {
             String domain = data.getFirst();
             String ip = data.size() > 1 ? data.get(1) : null;
 
             Rule rule = new Rule();
-            rule.setSource(RuleSet.DNSMASQ);
+            rule.setSourceType(RuleSet.DNSMASQ);
             rule.setOrigin(line);
             rule.setTarget(domain);
             rule.setDest(ip);
             rule.setScope(Rule.Scope.DOMAIN);
             rule.setType(Rule.Type.BASIC);
-            rule.setMode(ip == null || Util.equalsAny(ip, LOCAL_V4, LOCAL_V6) ?
-                    Rule.Mode.DENY : Rule.Mode.REWRITE);
+            rule.setMode((ip == null || LOCAL_IPS.contains(ip)) ? Rule.Mode.DENY : Rule.Mode.REWRITE);
             return rule;
         }
-        return null;
+        return Rule.EMPTY;
     }
 
     @Override
@@ -50,10 +49,10 @@ public final class DnsmasqHandler extends Handler implements InitializingBean {
             builder.append(DNSMASQ_HEADER)
                     .append(rule.getTarget());
             if (Rule.Mode.REWRITE.equals(rule.getMode())) {
-                builder.append(SLASH)
+                builder.append(Symbol.SLASH)
                         .append(rule.getDest());
             }
-            builder.append(SLASH);
+            builder.append(Symbol.SLASH);
             return builder.toString();
         }
         return null;
@@ -61,14 +60,14 @@ public final class DnsmasqHandler extends Handler implements InitializingBean {
 
     @Override
     public String commented(String value) {
-        return Util.splitIgnoreBlank(value, LF).stream()
-                .map(e -> HASH + WHITESPACE + e.trim())
-                .collect(Collectors.joining(CRLF));
+        return Util.splitIgnoreBlank(value, Symbol.LF).stream()
+                .map(e -> Symbol.HASH + Symbol.WHITESPACE + e.trim())
+                .collect(Collectors.joining(Symbol.CRLF));
     }
 
     @Override
     public boolean isComment(String line) {
-        return line.startsWith(HASH);
+        return line.startsWith(Symbol.HASH);
     }
 
     @Override

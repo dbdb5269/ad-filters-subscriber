@@ -1,5 +1,6 @@
 package org.fordes.adfs.handler.rule;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.fordes.adfs.constant.Constants;
 import org.fordes.adfs.enums.RuleSet;
@@ -15,18 +16,17 @@ public abstract sealed class Handler permits EasylistHandler, DnsmasqHandler, Cl
 
     /**
      * 解析规则<br/>
-     * 返回 null 即表示解析失败
+     * 返回 {@link Rule#EMPTY} 即表示解析失败
      *
      * @param line 规则文本
      * @return {@link Rule}
      */
-    public abstract @Nullable Rule parse(String line);
+    public abstract @Nonnull Rule parse(String line);
 
     /**
      * 转换规则<br/>
-     * 如返回 null 即表示转换失败
      *
-     * @param rule {@link Rule}
+     * @param rule {@link Rule} null 表示无法转换或失败
      * @return 规则文本
      */
     public abstract @Nullable String format(Rule rule);
@@ -42,14 +42,14 @@ public abstract sealed class Handler permits EasylistHandler, DnsmasqHandler, Cl
      * 某些规则格式拥有固定的头部内容，可实现此方法以返回
      */
     public String headFormat() {
-        return Constants.EMPTY;
+        return Constants.Symbol.EMPTY;
     }
 
     /**
      * 某些规则格式拥有固定的尾部内容，可实现此方法以返回
      */
     public String tailFormat() {
-        return Constants.EMPTY;
+        return Constants.Symbol.EMPTY;
     }
 
     /**

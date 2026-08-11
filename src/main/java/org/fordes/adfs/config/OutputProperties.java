@@ -1,46 +1,56 @@
 package org.fordes.adfs.config;
 
-import lombok.Data;
-import org.fordes.adfs.constant.Constants;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.fordes.adfs.enums.RuleSet;
 import org.fordes.adfs.model.Rule;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
-import java.util.Optional;
 import java.util.Set;
 
 /**
- * 输出配置
  *
- * @author fordes123 on 2022/9/19
+ * @author fordes on 2025/10/29
  */
-@Data
-@Component
 @ConfigurationProperties(prefix = "application.output")
-public class OutputProperties {
+public record OutputProperties(
+        @DefaultValue("")
+        String fileHeader,
 
-    private String fileHeader;
-    private String path;
-    private Set<OutputFile> files;
+        @DefaultValue("rule")
+        String path,
 
-    public record OutputFile(String name, RuleSet type, Set<Rule.Type> filter, String desc) {
+        @NotEmpty(message = "the output config is empty")
+        Set<@Valid @NotNull Item> files
+) {
 
-        public OutputFile(String name, RuleSet type, Set<Rule.Type> filter, String desc) {
-            this.name = Optional.ofNullable(name).filter(StringUtils::hasText).orElseThrow(() -> new IllegalArgumentException("application.output.files.name is required"));
-            this.type = Optional.ofNullable(type).orElseThrow(() -> new IllegalArgumentException("application.output.files.type is required"));
-            this.desc = Optional.ofNullable(desc).filter(StringUtils::hasText).orElse(Constants.EMPTY);
-            this.filter = Optional.ofNullable(filter).orElse(Set.of(Rule.Type.values()));
-        }
+
+    public record Item(
+            @NotBlank
+            String name,
+
+            @NotNull
+            RuleSet type,
+
+            @DefaultValue("")
+            String desc,
+
+            @DefaultValue("")
+            String fileHeader,
+
+            @NotEmpty
+            @DefaultValue({})
+            Set<Rule.Type> filter,
+
+            @NotEmpty
+            @DefaultValue({})
+            Set<@NotBlank String> rule
+
+    ) {
 
     }
 
-    public void setPath(String path) {
-        this.path = Optional.ofNullable(path).filter(StringUtils::hasText).orElse("rule");
-    }
-
-    public boolean isEmpty() {
-        return files == null || files.isEmpty();
-    }
 }
